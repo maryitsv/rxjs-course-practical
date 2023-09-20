@@ -5,10 +5,12 @@ export function createHttpObservable(url:string) {
     return Observable.create(observer => {
 
         const controller = new AbortController();
+        //esto es new para mi
         const signal = controller.signal;
 
         fetch(url, {signal})
             .then(response => {
+                console.log(signal);
 
                 if (response.ok) {
                     return response.json();
@@ -30,7 +32,7 @@ export function createHttpObservable(url:string) {
 
             });
 
-        return () => controller.abort()
+        return () => controller.abort();
 
 
     });
