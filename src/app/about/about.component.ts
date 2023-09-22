@@ -18,6 +18,7 @@ import {
 import { concatMap, delayWhen, filter, map, take, timeout } from 'rxjs/operators';
 import { createHttpObservable } from '../common/util';
 import { DOCUMENT } from '@angular/common';
+import { SubjectSubscriber } from 'rxjs/internal/Subject';
 
 
 @Component({
@@ -32,102 +33,41 @@ export class AboutComponent implements OnInit {
     }
 
     ngOnInit() {
-        // asi cancelamos el observable
-       //const interval$ = interval(1000);
+       
+        // generalmente es una buena practica que el subject sea privado 
+        // y que solo esta clase lo manipule next
+        // el resto de clases de deberian comunicar o suscribirse a la version publica asObservable
+        // const subject = new Subject();
+        /*const subject = new BehaviorSubject(0);
+        // subject.subscribe();
 
-       //const sub = interval$.subscribe(console.log);
+        const series$ = subject.asObservable();// este podria ser el obs publico
+        series$.subscribe(val =>console.log('early ',val))
+        subject.next(1);
+        subject.next(2);
+        subject.next(3);
+        subject.complete();
+        setTimeout(()=>{
+            series$.subscribe(val =>console.log('late ',val));
+         //   subject.next(4);
+        },2000)*/
 
-       //setTimeout(()=>sub.unsubscribe,5000);
+        const subject = new Subject();
+        
+        const series$ = subject.asObservable();// este podria ser el obs publico
+        series$.subscribe(val =>console.log('first sub ',val))
+        subject.next(1);
+        subject.next(2);
+        subject.next(3);
+        subject.complete();
+        setTimeout(()=>{
+            series$.subscribe(val =>console.log('second ',val));
+         //   subject.next(4);
+        },2000)
 
-
-       const http$ =  createHttpObservable('/api/courses');
-
-       const sub = http$.subscribe();
-
-       setTimeout(()=>sub.unsubscribe(),0);
 
     }
 
-    /**session 2 
-     * const source1$ = of(1,2,3);
-       const source2$ = of(4,5,6);
-       const source3$ = of(7,8,9);
-
-       const result$ = concat (source1$, source2$, source3$);
-       result$.subscribe(val=> console.log(val));
-
-
-        const interval1$ = interval(1000);
-        const interval2$ = interval1$.pipe(map(val => val * 10));
-
-        const result = merge(interval1$, interval2$);
-
-        result.subscribe(console.log);
-     */
-
-    /**
-     * session 1
-        const http$ = Observable.create(observer => {
-            //observer.next() , complete error
-            fetch('/api/courses')
-                .then(res => {
-                    res.json();
-                })
-                .then(res => {
-                    observer.next(res);
-                    observer.complete();
-                    console.log('aqui')
-                    // si hacemos otra vez next falla
-                    observer.next({'as':'like'});
-                })
-                .catch(err=>{
-                    observer.err(err);
-                })
-                ; // promesa
-        });
-
-        http$.subscribe(
-            result=>{
-                console.log('encontro los cursos del api', result);
-            },
-            noop,
-            ()=>console.log('completed'));
-        
-        //const interval$ = interval(1000);
-        const interval$ = timer(3000, 1000);
-        const sub = interval$.subscribe((val)=>{
-            console.log('interval', val);
-        });
-
-        setTimeout(()=>
-            sub.unsubscribe()
-        ,5000)
-
-        const clicks$ = fromEvent(this.document,'click');
-        clicks$.subscribe(
-            event=>{ console.log(event)},
-            err=>{ console.log(err)},
-            ()=> console.log('completed')
-        );
-        
-        // streams
-        
-        this.document.addEventListener('click',evt=>{
-            console.log(evt);
-        });
-
-        let counter = 0;
-
-        setInterval(()=>{
-            console.log(counter);
-            counter++;
-        },1000);
-
-        setTimeout(()=>{
-            console.log('timeout here')
-        },3000);
-
-     */
 }
 
 

@@ -10,7 +10,7 @@ export function createHttpObservable(url:string) {
 
         fetch(url, {signal})
             .then(response => {
-                console.log(signal);
+              //  console.log(signal);
 
                 if (response.ok) {
                     return response.json();

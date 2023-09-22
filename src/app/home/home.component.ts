@@ -23,49 +23,14 @@ export class HomeComponent implements OnInit {
     beginnerCourses$: Observable<Course[]>;
     advancedCourses$: Observable<Course[]>;
 
-
     constructor(private store:Store) {
 
     }
 
     ngOnInit() {
+        this.beginnerCourses$ = this.store.selectBeginnerCourses();
 
-        const http$ =  createHttpObservable('/api/courses');
-        /*const courses$ = http$.pipe(
-            catchError((err)=>{
-                console.log('hubo un error',err)
-                //return of([]);
-                return throwError(err)
-            }),
-            finalize(()=>{
-                console.log('se ejecuta cuando falla o cuando completa')
-            }),
-            tap(()=>console.log('http request executed')),
-            map(res=> Object.values(res['payload'])),
-            shareReplay(),
-            catchError((err)=>{
-                console.log('error de nuevo')// se puede aplicar todas las veces que necesitemos
-                return throwError(err)
-            }),
-            finalize(()=>{
-                console.log('finalize de nuevo')//se puede aplicar todas las veces que necesitemos
-            })
-            );*/
-        const courses$ = http$.pipe(
-            tap(()=>console.log('http request executed')),
-            map(res=> Object.values(res['payload'])),
-            shareReplay(),
-            retryWhen(error=> error.pipe(()=>timer(2000)))
-            );
-        
-        
-        this.beginnerCourses$ = courses$.pipe(
-            map((courses :any[])=> courses.filter(courses=> courses['category']==='BEGINNER'))
-        );
-
-        this.advancedCourses$ = courses$.pipe(
-            map((courses :any[])=> courses.filter(courses=> courses['category']==='ADVANCED'))
-        );
+        this.advancedCourses$ = this.store.selectAdvancedCourses();
     }
 
 }

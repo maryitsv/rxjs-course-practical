@@ -11,9 +11,9 @@ import {
     concatMap,
     switchMap,
     withLatestFrom,
-    concatAll, shareReplay
+    concatAll, shareReplay, first, take
 } from 'rxjs/operators';
-import {merge, fromEvent, Observable, concat} from 'rxjs';
+import {merge, fromEvent, Observable, concat, forkJoin} from 'rxjs';
 import {Lesson} from '../model/lesson';
 import {createHttpObservable} from '../common/util';
 import {Store} from '../common/store.service';
@@ -33,6 +33,8 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
     lessons$: Observable<Lesson[]>;
 
+    course: Course;
+
 
     @ViewChild('searchInput', { static: true }) input: ElementRef;
 
@@ -45,9 +47,23 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
         this.courseId = this.route.snapshot.params['id'];
 
-        this.course$ = this.store.selectCourseById(this.courseId);
-     //   this.lessons$ = this.loadLessons();
+        this.course$ = this.store.selectCourseById(this.courseId);//long runing observable
+        //.pipe(take(2));
+        //forkJoin(this.course$,this.loadLessons()).subscribe(res=>console.log('aqui fork',res));
 
+        // cuando tenemos un observable que no termina y necesitamos forzar el completado
+        // podemos usar first para obtener elprimer resultado
+        // podemos usar take(2) para forzar el completado despues de determinada cantidad de items
+       
+
+        this.loadLessons()
+        .pipe(
+            withLatestFrom(this.course$)
+        ).subscribe(([lesson,course])=>{
+            console.log('lesson',lesson),
+            console.log('course',course);
+        })
+        // combina el observable load leson con el ultimo valor que reciba de course
     }
 
     ngAfterViewInit() {
@@ -61,7 +77,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
             distinctUntilChanged(),
             switchMap(search=> this.loadLessons(search))
         );
-        console.log('aqui', this.lessons$ )
+       
 
     }
 
